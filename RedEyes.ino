@@ -72,33 +72,35 @@ void setup() {
   pinMode(eyePin, INPUT);
   sr.setAllLow();
   Serial.begin(9600);
-  Serial.println("mp3 begin");
+  //Serial.println("mp3 begin");
   mp3.begin();
   uint16_t volume = mp3.getVolume();
-  Serial.print("volume ");
-  Serial.println(volume);
+  //Serial.print("volume ");
+  //Serial.println(volume);
   mp3.setVolume(0);
   
   uint16_t count = mp3.getTotalTrackCount(DfMp3_PlaySource_Sd);
-  Serial.print("files ");
-  Serial.println(count);
+  //Serial.print("files ");
+  //Serial.println(count);
 } 
 
 void loop() {
   delay(1000);
   intEye = digitalRead(eyePin);
-  Serial.println(intEye);
+  //Serial.println(intEye);
   if (intEye > 0){
-    delay(1000);    
-    //musicFadeIn();
+    delay(1000);
+    //musicPlay();
     shuffleLeds(gUbound);
     WakeOrSleep(1);
+    musicFadeIn();
+    Serial.println("staring now");
     do{
       Stare(gUbound);
     } while (digitalRead(eyePin) != 0);
     shuffleLeds(gUbound);
+    musicFadeOut();
     WakeOrSleep(0);
-    //musicFadeOut();
   }  
 }
 
@@ -110,7 +112,7 @@ void musicFadeIn(){
   musicPlay();
   for (int intCounter = 0; intCounter < 30; intCounter++){
     mp3.setVolume(intCounter);
-    delay(250);
+    delay(50);
   }
 }
 
@@ -121,7 +123,7 @@ void musicFadeOut(){
   }
 }
 void Stare(int aintUbound){
-  for (int intCounter = 0; intCounter < random(10, 18); intCounter++){
+  for (int intCounter = 0; intCounter < random(8, 14); intCounter++){
     int intBlink = 5;
     if (random(0, 9) > intBlink){
       int intREye = random(0, aintUbound);
@@ -129,20 +131,30 @@ void Stare(int aintUbound){
     }
     int intShake = 5;
     if (random(0, 9) > intShake){
-      //Shake();
+      Shake();
     }
     delay(1000);
   }
 }
+
 void Shake(){
   digitalWrite(vibPin, HIGH);
-  delay(random(300,1000));
+  delay(random(100,500));
   digitalWrite(vibPin, LOW);
 }
 
-volumeUpDown(int aintIncrement){
+void volumeUpDown(int aintIncrement){
   uint16_t volume = mp3.getVolume();
-  mp3.setVolume(volume + aintIncrement);
+  int newVolume = volume + aintIncrement;
+  switch (newVolume){
+    case 31:
+      newVolume = 30;
+      break;
+    case -1:
+      newVolume = 0;
+      break; 
+  }
+  mp3.setVolume(newVolume);
 }
 
 void Blinky(int aintREye){
@@ -154,7 +166,13 @@ void Blinky(int aintREye){
 void WakeOrSleep(int aintAwake){
   for (int intCounter = 0; intCounter < gUbound; intCounter++){
       turnOn(intArrLeds[intCounter], aintAwake);
-      delay(random(400, 1200));
+      /*if (aintAwake = 0){
+        volumeUpDown(-1);
+      }
+      else{
+        volumeUpDown(1);  
+      }*/
+      delay(random(400, 800));
   }
 }
 
